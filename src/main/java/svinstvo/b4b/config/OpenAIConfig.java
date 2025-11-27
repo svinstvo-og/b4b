@@ -1,6 +1,7 @@
 package svinstvo.b4b.config;
 
 import lombok.Data;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -13,13 +14,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Slf4j
 public class OpenAIConfig {
     private String key;
-    private String baseUrl = "https://api.openai.com/v1";
-    private String modelMini = "gpt-4o-mini";
-    private String modelFull = "gpt-4o";
+    private String baseUrl;
+    private String modelMini;
+    private String modelFull;
 
     @Bean
     public WebClient openAIWebClient() {
-        log.debug("!!!!!!!!!!!!!!!!!!!! OpenAIKey - {}", key);
+        log.info("!!!!!!!!!!!!!!!!!!!! OpenAIKey - {}, baseUrl = {}", key, baseUrl);
         return WebClient.builder()
                 .baseUrl(baseUrl)
                 .defaultHeader("Authorization", "Bearer " + key)

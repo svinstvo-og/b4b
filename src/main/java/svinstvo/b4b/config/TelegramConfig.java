@@ -10,6 +10,6 @@ import java.sql.SQLOutput;
 @ConfigurationProperties(prefix = "telegram.bot")
 @Data
 public class TelegramConfig {
-    private String username = System.getenv("TELEGRAM_USERNAME");
-    private String token = System.getenv("TELEGRAM_TOKEN");
+    private String username;
+    private String token;
 }

@@ -1,5 +1,5 @@
 package svinstvo.b4b.service;
-
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -27,8 +27,13 @@ public class TelegramBotService extends TelegramLongPollingBot {
         this.ingestionService = ingestionService;
         this.batchProcessorService = batchProcessorService;
         this.reportingService = reportingService;
+    }
 
-        log.info("TelegramBotService initialized with bot: {}", telegramConfig.getUsername());
+    @PostConstruct
+    public void init() {
+        log.info("🤖 TelegramBotService initialized");
+        log.info("📱 Bot Username: {}", telegramConfig.getUsername());
+        log.info("✅ Ready to receive messages");
     }
 
     @Override
@@ -38,7 +43,15 @@ public class TelegramBotService extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        if (!update.hasMessage() || !update.getMessage().hasText()) {
+        log.info("📨 Received update: {}", update.getUpdateId());
+
+        if (!update.hasMessage()) {
+            log.debug("Update has no message, skipping");
+            return;
+        }
+
+        if (!update.getMessage().hasText()) {
+            log.debug("Message has no text, skipping");
             return;
         }
 
@@ -46,7 +59,7 @@ public class TelegramBotService extends TelegramLongPollingBot {
             String messageText = update.getMessage().getText();
             Long chatId = update.getMessage().getChatId();
 
-            log.info("Received message from chat {}: {}", chatId, messageText);
+            log.info("💬 Message from chat {}: '{}'", chatId, messageText);
 
             // Handle commands
             if (ingestionService.isCommand(messageText)) {
@@ -61,25 +74,33 @@ public class TelegramBotService extends TelegramLongPollingBot {
             ingestionService.updateLastUpdateId(update.getUpdateId());
 
         } catch (Exception e) {
-            log.error("Error processing update", e);
+            log.error("❌ Error processing update {}", update.getUpdateId(), e);
+            try {
+                sendMessage(update.getMessage().getChatId(),
+                        "❌ Sorry, I encountered an error. Please try again.");
+            } catch (Exception ex) {
+                log.error("Failed to send error message", ex);
+            }
         }
     }
 
     private void handleCommand(Long chatId, String command) {
-        log.info("Processing command: {}", command);
+        log.info("⚡ Processing command: {}", command);
 
         try {
-            switch (command.toLowerCase().split(" ")[0]) {
+            String cmd = command.toLowerCase().split(" ")[0];
+
+            switch (cmd) {
                 case "/start" -> handleStart(chatId);
                 case "/sync" -> handleSync(chatId);
                 case "/stats" -> handleStats(chatId);
                 case "/advice" -> handleAdvice(chatId);
                 case "/status" -> handleStatus(chatId);
                 case "/help" -> handleHelp(chatId);
-                default -> sendMessage(chatId, "Unknown command. Type /help for available commands.");
+                default -> sendMessage(chatId, "❓ Unknown command. Type /help for available commands.");
             }
         } catch (Exception e) {
-            log.error("Error handling command: {}", command, e);
+            log.error("❌ Error handling command: {}", command, e);
             sendMessage(chatId, "❌ Error processing command. Please try again.");
         }
     }
@@ -95,7 +116,7 @@ public class TelegramBotService extends TelegramLongPollingBot {
                 
                 I'll automatically categorize and track your spending!
                 
-                Commands:
+                📋 Commands:
                 /stats - Quick spending summary
                 /advice - Get AI financial advice
                 /sync - Process pending transactions
@@ -175,8 +196,9 @@ public class TelegramBotService extends TelegramLongPollingBot {
 
         try {
             execute(message);
+            log.debug("✉️ Sent message to chat {}", chatId);
         } catch (TelegramApiException e) {
-            log.error("Error sending message to chat {}", chatId, e);
+            log.error("❌ Error sending message to chat {}", chatId, e);
         }
     }
 }

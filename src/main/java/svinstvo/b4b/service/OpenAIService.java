@@ -28,7 +28,8 @@ public class OpenAIService {
     private static final String CATEGORIZATION_SYSTEM_PROMPT = """
             You are a financial parser. You will receive a list of raw strings. 
             Extract the item name, price, currency (default CZK if missing), and infer a category 
-            (Food, Transport, Rent, Fun, Tech, Utilities, Shopping, Health, Other).
+            (Overpriced-Food, Essential-Food, Transport, Rent, Fun, Tech, Utilities, Shopping, Health, Other).
+            Be harsh on food categorizing, food budget is limited, eating outside is often too expensive. 
             Return ONLY a raw JSON array. No markdown formatting, no backticks, no explanations.
             
             Input Format: ID: <id> | Text: <text>

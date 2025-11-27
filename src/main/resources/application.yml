@@ -23,12 +23,12 @@ spring:
 
 telegram:
   bot:
-    username: ${TELEGRAM_BOT_USERNAME}
-    token: ${TELEGRAM_BOT_TOKEN}
+    username: bang4buck_bot
+    token: xxx
 
 openai:
   api:
-    key: ${OPENAI_API_KEY}
+    key: xxx
     base-url: https://api.openai.com/v1
     model-mini: gpt-4o-mini
     model-full: gpt-4o
@@ -37,3 +37,12 @@ b4b:
   processor:
     batch-size: 50
     schedule-cron: "0 */5 * * * *"
+
+logging:
+  level:
+    root: INFO
+    svinstvo.b4b: DEBUG
+    org.telegram: DEBUG
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
